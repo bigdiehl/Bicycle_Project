@@ -25,6 +25,8 @@
     <param name="robot_description" command="xacro '$(arg model)'" />
     <param name="use_gui" value="$(arg gui)"/>
 
+    <!--node name="static_tf" pkg="bicycle_description" type="static_tf.py" args="back_frame 0 0 0 0.2 0 0"/ -->
+
      <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model bicycle -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description"/>
 

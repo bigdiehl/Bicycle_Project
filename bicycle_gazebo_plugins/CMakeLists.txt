@@ -38,7 +38,7 @@ catkin_package(
 #add_library(${PROJECT_NAME} src/bicycle_plugin.cpp src/pid_controller.cpp src/test_plugin.cpp)
 #add_library(${PROJECT_NAME}  src/test_plugin.cpp)
 add_library(test_plugin  src/test_plugin.cpp)
-add_library(bicycle_plugin  src/bicycle.cpp)
+add_library(bicycle_plugin  src/bicycle_plugin.cpp)
 
 # Need to link to gazebo_ros_utils.so. CLEAN THIS UP
 #target_link_libraries(${PROJECT_NAME}  /opt/ros/$ENV{ROS_DISTRO}/lib/libgazebo_ros_utils.so ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})

@@ -231,21 +231,6 @@ UNITS: All distances in meters, all angles in radians, all masses in kg-->
     <dynamic damping="0" friction="0.002" />
   </joint>
 
-
-  <!--***********************************-->
-  <!--__________DUMMY LINK_______________-->
-  <!--***********************************-->
-  <link name="dummy_link"> 
-  </link>
-
-  <joint name="dummy" type="fixed">
-    <parent link="dummy_link"/>
-    <child link="back_frame"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-  </joint>
-
-
-
 </robot>
 
 

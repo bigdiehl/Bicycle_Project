@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+# Test script. Experiment with calling gazebo service to apply joint effort. 
 
 import roslib
 import rospy

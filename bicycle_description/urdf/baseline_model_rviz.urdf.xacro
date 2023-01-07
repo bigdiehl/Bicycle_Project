@@ -183,8 +183,8 @@ UNITS: All distances in meters, all angles in radians, all masses in kg-->
   <!--_________FRONT WHEEL LINK___________-->
   <!--***********************************-->
 
-   <!--link name="front_wheel">
-    <visual>
+   <link name="front_wheel">
+    <!--visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
           <mesh filename="package://bicycle_description/meshes/baseline_model/wheel_medium.stl" />

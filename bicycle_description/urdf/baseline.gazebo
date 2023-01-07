@@ -3,7 +3,7 @@
 
     <!-- ros_control plugin -->
     <gazebo>
-        <plugin name="bicycle_plugin" filename="libbicycle_gazebo_plugin.so" />
+        <plugin name="bicycle_plugin" filename="libbicycle_plugin.so" />
     </gazebo>
     
     <!-- Main Frame -->

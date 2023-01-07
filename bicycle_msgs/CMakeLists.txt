@@ -22,6 +22,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   bicycle_cmd.msg
+  joint_torque.msg
+  joint_vel.msg
 )
 
 # Generate added messages and services with any dependencies listed here
