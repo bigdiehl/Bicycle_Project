@@ -1,0 +1,273 @@
+<?xml version="1.0"?>
+
+<!-- NOTE - This is a copy of baseline_model, but with slight modifications for rviz. For some reason (perhaps WSL related)
+the stl meshes will not render in rviz. So we are just generating thin cylinders for the wheels for visualization and that's it. 
+-->
+
+
+<!-- DESCRIPTION: Bicycle Model that follows parameterization in Meijaard (2007) and uses 
+geometric and inertial values from Astrom (2005)
+UNITS: All distances in meters, all angles in radians, all masses in kg-->
+
+<robot name="bicycle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!-- CAD URL: https://cad.onshape.com/documents/e5ef9716c5b71004058bf9ce/w/ae8819e9743ff8e3d490a09a/e/5a0b072f3be44112fc069069 -->
+
+   <!-- Import Rviz colors -->
+  <xacro:include filename="$(find bicycle_description)/urdf/colors.xacro" />
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <xacro:include filename="$(find bicycle_description)/urdf/baseline.gazebo" />
+
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="PI" value="3.1415926535897931"/>
+  <xacro:property name="DEG2RAD" value="0.0174533"/>
+
+  <!-- Basic Geometric Parameters -->
+  <xacro:property name="wheel_radius" value="${0.35}"/>
+  <xacro:property name="wheel_base" value="${1.0}"/>
+  <xacro:property name="trail" value="${0.08}"/>
+  <xacro:property name="steer_axis_tilt" value="${20*DEG2RAD}"/>
+
+  <!-- Derived Values. d1-3 from alternative parameterization -->
+  <xacro:property name="wheel_diameter" value="${wheel_radius*2}"/>
+  <xacro:property name="d1" value="${cos(steer_axis_tilt)*(trail+wheel_base-wheel_radius*tan(steer_axis_tilt))}"/>
+  <xacro:property name="d3" value="${-cos(steer_axis_tilt)*(trail-wheel_radius*tan(steer_axis_tilt))}"/>
+  <xacro:property name="d2" value="${(wheel_radius+d1*sin(steer_axis_tilt)-wheel_radius+d3*sin(steer_axis_tilt))/cos(steer_axis_tilt)}"/>
+
+
+  <!-- ______Inertia Parameters______ -->
+
+  <!-- Front/Back Wheel (w) -->
+  <!-- Wheel mesh frame has origin at center of wheel. Frame orientation is such 
+  that wheel lies in xz plane, with y axis perpindicular (i.e. along rotation axis)-->
+  <xacro:property name="m_w" value="${1.5}"/>
+
+  <xacro:property name="I_wxx" value="${0.07}"/>
+  <xacro:property name="I_wyy" value="${0.14}"/>
+  <xacro:property name="I_wzz" value="${0.07}"/>
+  <xacro:property name="I_wxy" value="${0.0}"/>
+  <xacro:property name="I_wxz" value="${0.0}"/>
+  <xacro:property name="I_wyz" value="${0.0}"/>
+
+  <xacro:property name="x_w" value="${0}"/>
+  <xacro:property name="y_w" value="${0}"/>
+  <xacro:property name="z_w" value="${0}"/>
+
+  <!-- Main Frame (b) -->
+  <!-- Frame mesh has origin centered at rear wheel mount point, such that it lies centered on 
+  rear wheel rotation axis. Frame orientations is such that frame lies in xz plane, with y axis 
+  perpindicular. Nominal Frame orientation consistent with final CAD assembly -->
+  <xacro:property name="m_b" value="${12}"/>
+
+  <xacro:property name="I_bxx" value="${0.476}"/>
+  <xacro:property name="I_byy" value="${1.033}"/>
+  <xacro:property name="I_bzz" value="${0.527}"/>
+  <xacro:property name="I_bxy" value="${0.0}"/>
+  <xacro:property name="I_bxz" value="${-0.274}"/>
+  <xacro:property name="I_byz" value="${0.0}"/>
+
+  <xacro:property name="x_b" value="${0.439}"/>
+  <xacro:property name="y_b" value="${0}"/>
+  <xacro:property name="z_b" value="${0.579}"/>
+
+  <!-- Steering and handlebars (h) -->
+  <!-- Steering column mesh has origin along steering axis, with origin at d1,d2 intersection.  
+  Frame orientation is such that steering axis is aligned with z axis, x axis is pointing 
+  forward, and y axis perpindicular (aligned with left handlebar) -->
+  <xacro:property name="m_h" value="${2}"/>
+
+  <xacro:property name="I_hxx" value="${0.08}"/>
+  <xacro:property name="I_hyy" value="${0.07}"/>
+  <xacro:property name="I_hzz" value="${0.02}"/>
+  <xacro:property name="I_hxy" value="${0}"/>
+  <xacro:property name="I_hxz" value="${0.02}"/>
+  <xacro:property name="I_hyz" value="${0}"/>
+
+  <xacro:property name="x_h" value="${0.866}"/>
+  <xacro:property name="y_h" value="${0}"/>
+  <xacro:property name="z_h" value="${0.676}"/>
+
+
+  <!--***********************************-->
+  <!--_________BACK WHEEL LINK____________-->
+  <!--***********************************-->
+
+   <link name="back_wheel">
+    <!--visual>
+      <origin rpy="0 0 0" xyz="0 0 ${wheel_radius}"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/wheel_medium.stl" />
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 ${wheel_radius}"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/wheel_medium.stl" />
+      </geometry>
+    </collision-->
+
+    <visual>
+      <origin rpy="${PI/2} 0 0" xyz="0 0 ${wheel_radius}"/>
+      <geometry>
+          <cylinder radius="${wheel_radius}" length="0.01"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_w} ${y_w} ${z_w + wheel_radius}"/>
+      <mass value="${m_w}"/>
+      <inertia ixx="${I_wxx}" ixy="${I_wxy}" ixz="${I_wxy}"
+               iyy="${I_wyy}" iyz="${I_wyz}"
+               izz="${I_wzz}" />
+    </inertial>
+  </link>
+
+  <!--***********************************-->
+  <!--_________BACK FRAME LINK___________-->
+  <!--***********************************-->
+
+   <link name="back_frame">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/back_frame.stl" />
+      </geometry>
+      <material name="blue"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/back_frame.stl" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_b} ${y_b} ${z_b - wheel_radius}"/>
+      <mass value="${m_b}"/>
+      <inertia ixx="${I_bxx}" ixy="${I_bxy}" ixz="${I_bxy}"
+               iyy="${I_byy}" iyz="${I_byz}"
+               izz="${I_bzz}" />
+    </inertial>
+  </link>
+
+  <!--***********************************-->
+  <!--_________FRONT FRAME LINK__________-->
+  <!--***********************************-->
+
+   <link name="front_frame">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/front_frame.stl" />
+      </geometry>
+      <material name="gray"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/front_frame.stl" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin rpy="0 ${steer_axis_tilt} 0" xyz="${x_h - d1*cos(steer_axis_tilt)} ${y_h} ${z_h - wheel_radius - d1*sin(steer_axis_tilt)}"/>
+      <mass value="${m_h}"/>
+      <inertia ixx="${I_hxx}" ixy="${I_hxy}" ixz="${I_hxy}"
+               iyy="${I_hyy}" iyz="${I_hyz}"
+               izz="${I_hzz}" />
+    </inertial>
+  </link>
+
+
+  <!--***********************************-->
+  <!--_________FRONT WHEEL LINK___________-->
+  <!--***********************************-->
+
+   <link name="front_wheel">
+    <!--visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/wheel_medium.stl" />
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/baseline_model/wheel_medium.stl" />
+      </geometry>
+    </collision-->
+
+    <visual>
+      <origin rpy="${PI/2} 0 0" xyz="0 0 0"/>
+      <geometry>
+          <cylinder radius="${wheel_radius}" length="0.01"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_w} ${y_w} ${z_w}"/>
+      <mass value="${m_w}"/>
+      <inertia ixx="${I_wxx}" ixy="${I_wxy}" ixz="${I_wxy}"
+               iyy="${I_wyy}" iyz="${I_wyz}"
+               izz="${I_wzz}" />
+    </inertial>
+  </link>
+
+  <!--***********************************-->
+  <!--______________JOINTS_______________-->
+  <!--***********************************-->
+
+  <!-- Connects the back_frame to the back_wheel -->
+  <joint name="back_wheel_joint" type="continuous">
+    <parent link="back_wheel"/>
+    <child link="back_frame"/>
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamic damping="0" friction="0.002" />
+  </joint>
+
+  <!-- Connects the front_frame to the back_frame -->
+  <joint name="steering_joint" type="continuous">
+    <parent link="back_frame"/>
+    <child link="front_frame"/>
+    <origin rpy="0 ${-steer_axis_tilt} 0" xyz="${d1*cos(steer_axis_tilt)} 0 ${d1*sin(steer_axis_tilt)}" />
+    <axis xyz="0 0 1"/>
+    <dynamic damping="0" friction="0.002" />
+  </joint>
+
+  <!-- Connects the front_wheel to front_frame-->
+  <joint name="front_wheel_joint" type="continuous">
+    <parent link="front_frame"/>
+    <child link="front_wheel"/>
+    <origin xyz="${d3} 0 ${-d2}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamic damping="0" friction="0.002" />
+  </joint>
+
+
+  <!--***********************************-->
+  <!--__________DUMMY LINK_______________-->
+  <!--***********************************-->
+  <link name="dummy_link"> 
+  </link>
+
+  <joint name="dummy" type="fixed">
+    <parent link="dummy_link"/>
+    <child link="back_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+
+
+</robot>
+
+
+

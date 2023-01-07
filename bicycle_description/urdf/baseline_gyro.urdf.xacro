@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+
+<!-- DESCRIPTION: Extension of bicycle model with gimballed flywheel.-->
+
+<robot name="bicycle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!-- CAD URL: https://cad.onshape.com/documents/e5ef9716c5b71004058bf9ce/w/ae8819e9743ff8e3d490a09a/e/5a0b072f3be44112fc069069 -->
+
+  <!-- Import baseline model -->
+  <xacro:include filename="$(find bicycle_description)/urdf/baseline_model.urdf.xacro" />
+
+  <!-- Import gazebo specific tags for this model -->
+  <xacro:include filename="$(find bicycle_description)/urdf/gyro.gazebo" />
+
+  <!-- ______Inertia Parameters______ -->
+
+  <!-- flywheel (f) -->
+  <xacro:property name="m_f" value="${1.3}"/>
+
+  <xacro:property name="I_fxx" value="${0.005}"/>
+  <xacro:property name="I_fyy" value="${0.002}"/>
+  <xacro:property name="I_fzz" value="${0.002}"/>
+  <xacro:property name="I_fxy" value="${0}"/>
+  <xacro:property name="I_fxz" value="${0}"/>
+  <xacro:property name="I_fyz" value="${0}"/>
+
+  <xacro:property name="x_f" value="${0}"/>
+  <xacro:property name="y_f" value="${0}"/>
+  <xacro:property name="z_f" value="${0}"/>
+
+  <!-- Gimbal frame (G) -->
+  <xacro:property name="m_G" value="${0.5}"/>
+
+  <xacro:property name="I_Gxx" value="${0.003}"/>
+  <xacro:property name="I_Gyy" value="${0.006}"/>
+  <xacro:property name="I_Gzz" value="${0.002}"/>
+  <xacro:property name="I_Gxy" value="${0}"/>
+  <xacro:property name="I_Gxz" value="${0}"/>
+  <xacro:property name="I_Gyz" value="${0}"/>
+
+  <xacro:property name="x_G" value="${0}"/>
+  <xacro:property name="y_G" value="${0}"/>
+  <xacro:property name="z_G" value="${0}"/>
+
+  <!-- gimbal (g) -->
+  <xacro:property name="m_g" value="${0.5}"/>
+
+  <xacro:property name="I_gxx" value="${0.001}"/>
+  <xacro:property name="I_gyy" value="${0.001}"/>
+  <xacro:property name="I_gzz" value="${0.0001}"/>
+  <xacro:property name="I_gxy" value="${0}"/>
+  <xacro:property name="I_gxz" value="${0}"/>
+  <xacro:property name="I_gyz" value="${0}"/>
+
+  <xacro:property name="x_g" value="${0}"/>
+  <xacro:property name="y_g" value="${0.033}"/>
+  <xacro:property name="z_g" value="${0}"/>
+
+  <!--***********************************-->
+  <!--_____________FLYWHEEL LINK_________-->
+  <!--***********************************-->
+
+  <!-- Flywheel mesh has origin at center, and is oriented with x-axis along flywheel
+  spin axis. -->
+  
+   <link name="flywheel">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/flywheel.stl" />
+      </geometry>
+      <material name="green"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/flywheel.stl" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_f} ${y_f} ${z_f}"/>
+      <mass value="${m_f}"/>
+      <inertia ixx="${I_fxx}" ixy="${I_fxy}" ixz="${I_fxy}"
+               iyy="${I_fyy}" iyz="${I_fyz}"
+               izz="${I_fzz}" />
+    </inertial>
+  </link>
+
+
+  <!--***********************************-->
+  <!--_________GIMBAL FRAME LINK_________-->
+  <!--***********************************-->
+
+  <!-- Frame mesh has origin at center, and is oriented to lie in xz plane with y axis 
+  perpindicular. Frame is mainly for visualization, and adding some additional weight to model. 
+  Will be fixed relative to the back_frame. -->
+  
+   <link name="gimbal_frame">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/gimbal_frame.stl" />
+      </geometry>
+      <material name="green"/>
+    </visual>
+
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/gimbal_frame.stl" />
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_G} ${y_G} ${z_G}"/>
+      <mass value="${m_G}"/>
+      <inertia ixx="${I_Gxx}" ixy="${I_Gxy}" ixz="${I_Gxy}"
+               iyy="${I_Gyy}" iyz="${I_Gyz}"
+               izz="${I_Gzz}" />
+    </inertial>
+  </link>
+
+
+  <!--***********************************-->
+  <!--_____________GIMBAL LINK___________-->
+  <!--***********************************-->
+
+  <!-- Frame mesh has origin at center, and is oriented to lie in xz plane with y axis 
+  perpindicular. Frame is mainly for visualization, and adding some additional weight to model. 
+  Will be fixed relative to the back_frame. -->
+  
+   <link name="gimbal">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/gimbal.stl" />
+      </geometry>
+      <material name="green"/>
+    </visual>
+
+    <!--collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+          <mesh filename="package://bicycle_description/meshes/gyro_model/gimbal.stl" />
+      </geometry>
+    </collision-->
+
+    <inertial>
+      <origin rpy="0 0 0" xyz="${x_g} ${y_g} ${z_g}"/>
+      <mass value="${m_g}"/>
+      <inertia ixx="${I_gxx}" ixy="${I_gxy}" ixz="${I_gxy}"
+               iyy="${I_gyy}" iyz="${I_gyz}"
+               izz="${I_gzz}" />
+    </inertial>
+  </link>
+
+  <!--***********************************-->
+  <!--______________JOINTS_______________-->
+  <!--***********************************-->
+
+  <!-- Connects gimbal_frame to back_frame. The xyz offset is relative to center 
+  of back_wheel axle (where back_frame's joint frame is at).  -->
+  <joint name="gimbal_frame_location" type="fixed">
+    <parent link="back_frame"/>
+    <child link="gimbal_frame"/>
+    <origin xyz="0.43 0 0.7" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Connects the gimbal to the gimbal_frame -->
+  <joint name="gimbal_joint" type="continuous">
+    <parent link="gimbal_frame"/>
+    <child link="gimbal"/>
+    <origin xyz="0 0 0" rpy="0 0 ${PI}"/>
+    <axis xyz="0 0 1"/>
+    <dynamic damping="0" friction="0.002" />
+  </joint>
+
+  <!-- Connects flywheel to gimbal -->
+  <joint name="flywheel_joint" type="continuous">
+    <parent link="gimbal"/>
+    <child link="flywheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamic damping="0" friction="0.002" />
+  </joint>
+
+</robot>

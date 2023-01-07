@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="model" default="$(find bicycle_description)/urdf/baseline_model_rviz.urdf.xacro"/>
+  <arg name="gui" default="true" />
+  <arg name="rvizconfig" default="$(find bicycle_description)/rviz/baseline.rviz" />
+
+  <param name="robot_description" command="xacro --inorder '$(arg model)'" />
+
+  <!-- <node name="joint_state_publisher" pkg="bicycle_viz" type="joint_state_publisher.py" output="screen" /> -->
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  <!--node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /-->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" output = "screen" />
+
+</launch>

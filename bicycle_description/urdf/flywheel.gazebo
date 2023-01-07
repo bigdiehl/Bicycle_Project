@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot>
+
+    <!-- flywheel -->
+    <gazebo reference="flywheel">
+        <material>Gazebo/Green</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+    
+</robot>

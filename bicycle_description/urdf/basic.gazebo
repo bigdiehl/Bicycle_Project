@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot>
+
+    <!-- ros_control plugin -->
+    <gazebo>
+        <plugin name="bicycle_plugin" filename="libbicycle_gazebo_plugin.so" />
+    </gazebo >
+    
+    <!-- Main Frame -->
+    <gazebo reference="base_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <visual>
+            <material> <!-- Wheel material -->
+            <ambient>${49/255} ${0/255} ${61/255} 1</ambient>
+            <diffuse>${112/255} ${92/255} ${168/255} 1</diffuse>
+            <specular>${255/255} ${255/255} ${255/255} 0.08</specular>
+            <emissive>0 0 0 1</emissive>
+            </material> <!-- End wheel material -->
+        </visual>
+    </gazebo>
+
+    <!-- Steering -->
+    <gazebo reference="steering_fork">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <visual>
+            <material> <!-- Wheel material -->
+            <ambient>${49/255} ${0/255} ${61/255} 1</ambient>
+            <diffuse>${112/255} ${92/255} ${168/255} 1</diffuse>
+            <specular>${255/255} ${255/255} ${255/255} 0.08</specular>
+            <emissive>0 0 0 1</emissive>
+            </material> <!-- End wheel material -->
+        </visual>
+    </gazebo>
+
+    <!-- Front Wheel -->
+    <gazebo reference="front_wheel">
+        <mu1>0.9</mu1>
+        <mu2>0.9</mu2>
+        <material>Gazebo/Black</material>
+    </gazebo>
+
+    <!-- Back Wheel -->
+    <gazebo reference="back_wheel">
+        <mu1>0.9</mu1>
+        <mu2>0.9</mu2>
+        <material>Gazebo/Black</material>
+    </gazebo>
+    
+</robot>

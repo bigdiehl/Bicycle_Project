@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot>
+
+    <!-- Gimbal Frame -->
+    <gazebo reference="gimbal_frame">
+        <material>Gazebo/Gray</material>
+    </gazebo>
+
+    <!-- gimbal -->
+    <gazebo reference="gimbal">
+        <material>Gazebo/Gray</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <!-- flywheel -->
+    <gazebo reference="flywheel">
+        <material>Gazebo/Green</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+    
+</robot>

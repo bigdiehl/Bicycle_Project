@@ -1,0 +1,52 @@
+# -------------------------------------------
+bicycle_plugin: {
+  command_topic : "bicycle_cmd",
+  update_rate : 100,
+  back_wheel_vel_control : true, #true = vel control, false = torque control 
+  steering_vel_control : true,
+}
+
+bicycle : {
+  wheel_diameter : 26, #in
+  wheel_base : 45, #in
+
+  initial_conditions : {
+    x : 0.0,        #m
+    y : 0.0,        #m
+    z : 0.0,        #m
+    vel : 0.0,      #m/s
+    tilt : 0.0,     #deg
+    pitch : 0.0,    #deg
+    heading : 0.0,  #deg from world x axis
+    delta : 0.0,    #deg, steering angle
+  },
+
+  back_wheel_motor: {
+    #PID velocity controller params
+    kp : 12.0,
+    ki : 0.1,
+    kd : 2,
+    u_max : 120, #Nm, max torque
+    u_min : -120, #Nm
+  },
+
+  steering_motor: {
+    #PID velocity controller params
+    kp : 12.0,
+    ki : 0.1,
+    kd : 2.0,
+    u_max : 50, #Nm, max torque
+    u_min : -50, #Nm
+  },
+}
+# -------------------------------------------
+
+lqr_controller : {
+  Q : [0, 0, 0,
+       0, 0, 0,
+       0, 0, 0],
+  R : [0, 0, 0]
+}
+
+
+
