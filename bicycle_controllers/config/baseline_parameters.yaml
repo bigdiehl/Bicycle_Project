@@ -22,8 +22,8 @@ bicycle : {
   back_wheel_motor: {
     #PID velocity controller params
     kp : 4.0,
-    ki : 0.1,
-    kd : 0.0,
+    ki : 0,
+    kd : 0,
     i_max: 1000, # integral max limit
     i_min: -1000,
     u_max : 120, #Nm, max torque
@@ -45,8 +45,6 @@ bicycle : {
 
 controller: {
 
-  vel_des : 4,
-
   # State Space matrices
   A : [1,0,0,
        0,1,0,
@@ -64,7 +62,7 @@ controller: {
         0, 0, 0,
         0, 0, 0],
     R : [0, 0, 0]
-  },
+  }
 }
 
 

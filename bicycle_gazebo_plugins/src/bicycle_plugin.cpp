@@ -14,17 +14,9 @@ This plugin will:
     4. TODO - Publishes info for debugging? (applied torque?)
 */
 
-
-// URDF should follow these naming conventions
-// #define BACK_WHEEL_JOINT  "back_wheel_joint"
-// #define FRONT_WHEEL_JOINT "front_wheel_joint"
-// #define STEERING_JOINT    "steering_joint"
-// #define GIMBAL_JOINT      "gimbal_joint"
-// #define FLYWHEEL_JOINT    "flywheel_joint"
-// #define BASE_LINK         "back_frame"
-
 const double DEG2RAD = 0.0174533;
 
+// URDF should follow these naming conventions
 const std::string BACK_WHEEL_JOINT("back_wheel_joint");
 const std::string FRONT_WHEEL_JOINT("front_wheel_joint");
 const std::string STEERING_JOINT("steering_joint");
@@ -258,14 +250,14 @@ void Bicycle::CmdTorqueCallback(const sensor_msgs::JointState::ConstPtr& state_c
     boost::mutex::scoped_lock scoped_lock ( lock );
 
     torque_cmds = state_cmd;
-    PrintJointStateMsg(state_cmd, "CmdTorqueCallback");
+    //PrintJointStateMsg(state_cmd, "CmdTorqueCallback");
 }
 
 void Bicycle::CmdVelCallback(const sensor_msgs::JointState::ConstPtr& state_cmd) {
     boost::mutex::scoped_lock scoped_lock ( lock );
     
     vel_cmds = state_cmd;
-    PrintJointStateMsg(state_cmd, "CmdVelCallback");
+    //PrintJointStateMsg(state_cmd, "CmdVelCallback");
 }
 
 void Bicycle::QueueThread() {
@@ -357,16 +349,16 @@ void Bicycle::OnUpdate(const common::UpdateInfo &_info) {
                 continue;
             }
             joint_name = model->GetJoint(vel_cmds->name[i])->GetScopedName();
-            gzdbg << "Here: " << joint_name << " " << vel_cmds->velocity[i] << std::endl;
+            //gzdbg << "Here: " << joint_name << " " << vel_cmds->velocity[i] << std::endl;
             jointController->SetVelocityTarget(joint_name, vel_cmds->velocity[i]);
-            //jointController->SetVelocityTarget(vel_cmds->name[i], vel_cmds->velocity[i]);
-
-            
         }
         //vel_cmds.reset();
     }
     jointController->Update();
 
+    
+// Temp jointController debug code
+#if 0
     std::map<std::string, double> mymap;
     std::map<std::string, common::PID> pids;
     common::Time t;
@@ -385,13 +377,9 @@ void Bicycle::OnUpdate(const common::UpdateInfo &_info) {
     for(auto i : pids) {
         gzdbg << "PID: " << i.first << " " << i.second.GetPGain() << std::endl;
     }
+#endif
 
-    // std::map<std::string, common::PID> GetVelocityPIDs
-    // std::map<std::string, double> GetForces 	( 		) 	const
-    // common::Time GetLastUpdateTime 	( 		) 	const
-    // std::map<std::string, double> GetVelocities 	( 		) 	const
-
-
+    
     if(torque_cmds) {
         for(int i=0; i<torque_cmds->name.size(); i++) {
             if(torque_cmds->name.size() != torque_cmds->effort.size()) {
@@ -430,6 +418,13 @@ void Bicycle::OnUpdate(const common::UpdateInfo &_info) {
     
     ++update_num;
 }
+
+/* TODO
+- See if I can use other common::PID parameters (only works with P,I,D? Not sure why)
+- Not sure I need to explicitly add the joints I want to control to the joint controller. I think it already has them 
+from the model. 
+- Scoped names? Not really consistent about this. Do I need to do this with the JointController?
+- Add position control option for joints. */
 
 
 

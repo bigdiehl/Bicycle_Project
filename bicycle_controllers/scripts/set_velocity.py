@@ -14,14 +14,15 @@ if __name__ == '__main__':
     pub = rospy.Publisher('bicycle/vel_cmd', JointState, queue_size=10)
     #pub = rospy.Publisher('bicycle/torque_cmd', JointState, queue_size=10)
 
+    wheel_radius = rospy.get_param("bicycle/wheel_radius", 0.35)
+
     rospy.init_node('velocity_commander')
     rate = rospy.Rate(1) # 1hz
 
-    #vel = rospy.get_param("initial_conditions/vel", 2);
-    vel=10
-
     while not rospy.is_shutdown():
         try:
+            # Need to convert from m/s to rad/s
+            vel = 10 #rospy.get_param("controller/vel_des", 4) / wheel_radius;
             log_str = "Setting vel to " + str(vel)
             rospy.loginfo(log_str)
 

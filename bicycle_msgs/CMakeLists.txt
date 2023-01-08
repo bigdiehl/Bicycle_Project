@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  bicycle_cmd.msg
+  BicycleCmd.msg
   joint_torque.msg
   joint_vel.msg
 )

@@ -162,6 +162,8 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/apply_joint_effort.py
   scripts/set_velocity.py
+  scripts/bicycle_controller.py
+  scripts/lqr_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
