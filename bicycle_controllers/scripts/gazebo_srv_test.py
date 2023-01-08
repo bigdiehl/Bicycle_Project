@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-# Test script. Experiment with calling gazebo service to apply joint effort. 
+# Commands the bicycle
 
 import roslib
 import rospy
 import time
 from gazebo_msgs.msg import *
 from gazebo_msgs.srv import *
+from bicycle_msgs.msg import BicycleCmd
 
 if __name__ == '__main__':
   rospy.init_node('apply_joint_effort_test')

@@ -13,7 +13,7 @@ bicycle : {
     x : 0.0,        #m
     y : 0.0,        #m
     z : 0.0,        #m
-    vel : 0.0,      #m/s
+    vel : 4.0,      #m/s
     roll : 0.0,     #deg
     heading : 0.0,  #deg from world x axis
     delta : 0.0,    #deg, steering angle
@@ -22,8 +22,8 @@ bicycle : {
   back_wheel_motor: {
     #PID velocity controller params
     kp : 4.0,
-    ki : 0,
-    kd : 0,
+    ki : 0.1,
+    kd : 0.0,
     i_max: 1000, # integral max limit
     i_min: -1000,
     u_max : 120, #Nm, max torque
@@ -45,24 +45,36 @@ bicycle : {
 
 controller: {
 
+  vel_des : 4,
+
   # State Space matrices
-  A : [1,0,0,
-       0,1,0,
-       0,0,1],
-  B : [0,0],
-  C : [0,0,1,
-       1,0,0],
-  D : [0, 0],
+  # A calcuted for v = 4
+  # Note - array strings here are evaluated to np.arrays in code
+  A :  "np.array([[  0.        ,   0.        ,   1.        ,   0.        ],
+       [  0.        ,   0.        ,   0.        ,   1.        ],
+       [ 12.31395651, -16.87760167,  -0.27173364,   2.60910336],
+       [  0.1920345 ,  15.36231465,   4.27949062,  -0.97726968]])",
+
+  B : "np.array([[ 0.        ],
+       [ 0.        ],
+       [-0.15580437],
+       [ 2.45373858]])",
+
+  C : "np.array([0, 1, 0, 0])",
+
+  D : "np.array([[0.]])",
 
   update_rate: 100, # Hz
   sigma: 0.01,  # Dirty derivative parameters
 
   lqr_controller : {
-    Q : [0, 0, 0,
-        0, 0, 0,
-        0, 0, 0],
-    R : [0, 0, 0]
-  }
+    Q : "np.array([[0, 0, 0, 0],
+       [0, 1, 0, 0],
+       [0, 0, 1, 0],
+       [0, 0, 0, 0]])",
+
+    R : "np.array([0.2])"
+  },
 }
 
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(bicycle_controllers)
+project(bicycle_worlds)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-# LIBRARIES bicycle_controllers
+#  LIBRARIES bicycle_worlds
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -122,7 +122,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/bicycle_controllers.cpp
+#   src/${PROJECT_NAME}/bicycle_worlds.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -133,7 +133,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/bicycle_controllers_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/bicycle_worlds_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -160,12 +160,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 # catkin_install_python(PROGRAMS
-#   scripts/controller.py
-#   scripts/bicycle_commander.py
-#   scripts/gazebo_srv_test.py
-#   scripts/set_velocity.py
-#   scripts/bicycle_controller.py
-#   scripts/lqr_controller.py
+#   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
@@ -202,7 +197,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_bicycle_controllers.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_bicycle_worlds.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

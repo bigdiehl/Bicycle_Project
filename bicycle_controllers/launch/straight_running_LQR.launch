@@ -21,7 +21,8 @@
     <param name="use_sim_time" value="$(arg use_sim_time)"/>
     <param name="bicycle_plugin/publish_update_rate" value="100"/>
 
-    <rosparam file="$(find bicycle_gazebo_plugins)/config/parameters.yaml" command="load"/>
+    <rosparam file="$(find bicycle_controllers)/config/straight_running.yaml" command="load"/>
+
 
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -31,11 +32,10 @@
         <arg name="use_sim_time" value="$(arg use_sim_time)"/>
         <arg name="headless" value="$(arg headless)"/>
         <arg name="verbose" value="true"/>
-        <arg name="world_name" value="$(find bicycle_description)/worlds/empty.world"/>
+        <arg name="world_name" value="$(find bicycle_worlds)/worlds/empty.world"/>
     </include>
 
-
-     <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model bicycle -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description_gazebo"/>
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
@@ -45,6 +45,12 @@
     <arg name="rvizconfig" default="$(find bicycle_description)/rviz/baseline.rviz" />
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" output="screen" />
 
-    <node pkg="bicycle_controllers"  name="set_velocity"  type="set_velocity.py" output="screen"/>
+    <!--node pkg="bicycle_controllers"  name="bicycle_controller"  type="bicycle_controller.py" output="screen"/-->
+    <node pkg="bicycle_controllers"  name="bicycle_commander"  type="bicycle_commander.py" output="screen"/>
 
+    <!-- Plotting -->
+    <!--node name="pos_vel_plot"
+        pkg="rqt_plot"
+        type="rqt_plot"
+        args="/joint_states/position[0] /joint_states/position[1]" /-->
 </launch>
