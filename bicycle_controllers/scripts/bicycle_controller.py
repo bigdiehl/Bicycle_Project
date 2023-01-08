@@ -19,9 +19,10 @@ import roslib
 import numpy as np
 
 from sensor_msgs.msg import JointState
+from nav_msgs.msg import Path
 from std_msgs.msg import Header
-from geometry_msgs.msg import Twist
-from bicycle_msgs.msg import BicycleCmd
+from geometry_msgs.msg import PoseStamped
+from bicycle_msgs.msg import BicycleCmd, BicycleStates
 
 # Controllers
 from lqr_controller import LQR_Controller
@@ -36,11 +37,13 @@ class BicycleController():
         # Will self-parameterize from parameter server
         self.controller = LQR_Controller()
 
-        # Publish actuator commands
+        # Publishers
         self.tau_pub = rospy.Publisher('bicycle/torque_cmd', JointState, queue_size=10)
         self.vel_pub = rospy.Publisher('bicycle/vel_cmd', JointState, queue_size=10)
+        self.path_pub = rospy.Publisher('bicycle/position', Path, queue_size=10)
+        self.states_pub = rospy.Publisher('bicycle/states', BicycleStates, queue_size=10)
 
-        # Subscribe to state/sensor information
+        # Subscribers/Listeners
         self.js_sub = rospy.Subscriber("joint_states", JointState, self.ReadJointStates)
         self.tf_listener = tf.TransformListener()
 
@@ -51,7 +54,8 @@ class BicycleController():
         self.control_rate = rospy.Rate(rospy.get_param("controller/update_rate", 100)) # Hz. Rate at which actuator commands will be sent
         self.sigma = rospy.get_param("controller/sigma", 0.01)
         self.wheel_radius = rospy.get_param("bicycle/wheel_radius", 0.35)
-        self.Ts = rospy.get_param("bicycle_plugin/publish_update_rate")
+        self.state_update_rate = rospy.get_param("bicycle_plugin/publish_update_rate")
+        self.Ts = 1.0 / self.state_update_rate
 
         # Position of the back wheel point, P
         self.x = 0 
@@ -82,14 +86,24 @@ class BicycleController():
         # Forces the controller to wait until the first set of states are received. 
         self.first_states_received = False
 
+        # Path msg
+        self.path = Path()
+        self.path.header.frame_id = 'world'
+        self.max_path_length = 200
+        self.path_publish_rate = 1 #Hz
+
+        self.rate = rospy.Rate(1)
+
+        self.n = 0
+
     def ReceiveCommand(self, msg):
         """ Receives BicycleCmd message """
         # Note - which values will actually be used depends on the particular controller. 
         self.commands = msg
 
     def ReadJointStates(self, msg):
-        """ Receives JointState messages and extracts the steering angle and
-        wheel velocities. """
+        """ Receives JointState messages and extracts the steering angle,
+        wheel velocities, etc """
 
         for i in range(len(msg.name)):
             if msg.name[i] == "back_wheel_joint":
@@ -113,7 +127,7 @@ class BicycleController():
         [self.x, self.y, self.z] = trans
 
         # Convert the rot quaternion to roll and heading angles. 
-        [self.phi, pitch, self.psi] = euler_from_quaternion(rot, axes='rzyx')
+        [self.psi, pitch, self.phi] = euler_from_quaternion(rot, axes='rzyx')
 
         # TODO - Perhaps there is a way to directly get the rates from Gazebo? Maybe a service call, or
         # something we can add to the plugin. 
@@ -125,30 +139,72 @@ class BicycleController():
         # Package into self.inputs for use by the controller
         # TODO - should we just store these in dictionary in first place? rather than in local variables 
         # and then packing up there?
-        self.inputs['phi']      = self.phidot.differentiate(self.phi, self.Ts)
-        self.inputs['delta']    = self.delta
+        # TODO - can probably be replaced by BicycleStates msg, below
+        self.inputs['phi']      = self.phi
+        self.inputs['delta']    = -self.delta
         self.inputs['phidot']   = self.phidot.differentiate(self.phi, self.Ts)
-        self.inputs['deltadot'] = self.deltadot
+        self.inputs['deltadot'] = -self.deltadot
 
-        self.first_states_received = True
+        states = BicycleStates()
+        h = Header()
+        h.stamp = rospy.Time.now()
+        states.header = h
+        states.roll           = self.phi
+        states.roll_rate      = self.phidot.get_derivative()
+        states.heading        = self.psi
+        states.heading_rate   = self.psidot.differentiate(self.psi, self.Ts)
+        states.steering_angle = self.delta
+        states.steering_rate  = self.deltadot
+        states.pos_x          = self.x
+        states.pox_y          = self.y
+        states.speed          = self.v
+        self.states_pub.publish(states)
+
+        self.n += 1
+        if self.n > 10:
+            self.first_states_received = True
+
+    def publish_path(self, event):
+        # h = Header()
+        # h.stamp = rospy.Time.now()
+        pose_st = PoseStamped()
+        pose_st.pose.position.x = self.x
+        pose_st.pose.position.y = self.y
+        #pose_st.pose.orientation.w = 1
+        pose_st.header.frame_id = 'map'
+        self.path.poses.append(pose_st)
+
+        # Limit path msg size
+        self.path.poses = self.path.poses[-self.max_path_length:]
+        
+        self.path_pub.publish(self.path)
+
+    def publish_control(self, event):
+        if self.first_states_received:
+            [torque_cmd, velocity_cmd, position_cmd] = self.controller.control(self.inputs, self.commands)
+            
+            if torque_cmd is not None:
+                self.tau_pub.publish(torque_cmd)
+
+            if velocity_cmd is not None:
+                self.vel_pub.publish(velocity_cmd)
+
+            if position_cmd is not None:
+                pass
+
+    def publish_states(self, event):
+        """ Publishes bicycle states """
+
 
     def run(self):
+        self.reset()
 
+        # TODO - might be a more elegant way to do this. We basically want to have several 
+        # different threads publishing at their own rate, and we want to be able to reset
+        # the node whenever the gazebo world is reset (as indicated by time moving backwards)
         while not rospy.is_shutdown():
             try:
-                if self.first_states_received:
-                    [torque_cmd, velocity_cmd, position_cmd] = self.controller.control(self.inputs, self.commands)
-                    
-                    if torque_cmd is not None:
-                        self.tau_pub.publish(torque_cmd)
-
-                    if velocity_cmd is not None:
-                        self.vel_pub.publish(velocity_cmd)
-
-                    if position_cmd is not None:
-                        pass
-
-                self.control_rate.sleep()
+                self.rate.sleep()
             except rospy.ROSTimeMovedBackwardsException:
                 self.reset()
                 rospy.logerr("ROS Time Backwards! Just ignore the exception!")
@@ -156,6 +212,11 @@ class BicycleController():
 
     def reset(self):
         self.first_states_received = False
+        self.path = Path()
+        self.path.header.frame_id = 'world'
+
+        rospy.Timer(rospy.Duration(1.0 / 100), self.publish_control)
+        rospy.Timer(rospy.Duration(1.0 / 1), self.publish_path)
 
 
 if __name__ == '__main__':

@@ -23,7 +23,7 @@ class Controller:
         """
         raise NotImplementedError("Must be implemented in child class")
 
-    def saturate(u, umax=None, umin=None):
+    def saturate(self, u, umax=None, umin=None):
         """ Utility function to saturate a value u given umax and umin. 
         If umax or umin not given, the respective bound will not be enforced """
         if(umax is not None and u > umax):

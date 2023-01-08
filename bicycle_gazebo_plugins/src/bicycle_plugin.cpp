@@ -324,7 +324,6 @@ void Bicycle::PublishBaseLinkTF() {
 }
 
 
-
 void Bicycle::OnUpdate(const common::UpdateInfo &_info) {
     boost::mutex::scoped_lock scoped_lock ( lock );
     static int twice = 0;

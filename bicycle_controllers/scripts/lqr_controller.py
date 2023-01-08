@@ -3,7 +3,7 @@
 import numpy as np
 import control as c
 import rospy
-#from controller import Controller
+from controller import Controller
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
 
@@ -40,8 +40,8 @@ def get_param_array(param, default):
     except KeyError:
         return default
 
-#class LQR_Controller (Controller) :
-class LQR_Controller:
+class LQR_Controller (Controller) :
+#class LQR_Controller:
     def __init__(self):
         #super(LQR_Controller, self).__init__(A,B,C,D)
 
@@ -65,8 +65,8 @@ class LQR_Controller:
         """ Assume control of the form u = kr*delta - Kx """
         self.K, S, E = c.lqr(self.A, self.B, self.Q, self.R)
         self.kr = -1.0/(self.C.dot(np.linalg.inv(self.A-self.B.dot(self.K))).dot(self.B))
-        rospy.logdebug("K = ", self.K)
-        rospy.logdebug("kr = ", self.kr)
+        rospy.loginfo("K = " + self.K.__repr__())
+        rospy.loginfo("kr = " + self.kr.__repr__())
 
     def control(self, inputs, cmd_msg):
         """ PARAMS
@@ -80,6 +80,8 @@ class LQR_Controller:
         state = np.array([inputs['phi'], inputs['delta'], inputs['phidot'], inputs['deltadot']])
 
         Td = self.kr*cmd_msg.desired_steer_angle - self.K.dot(state)
+        umax = 20
+        Td = self.saturate(Td, umax, -umax)
         
         h = Header()
         h.stamp = rospy.Time.now()
@@ -87,12 +89,15 @@ class LQR_Controller:
         torque_cmd = JointState()
         torque_cmd.header = h
         torque_cmd.name = ["steering_joint"]
-        torque_cmd.effort = [Td]
+
+        # NOTE - Torque is negative to align with Whipple model convention
+        torque_cmd.effort = [-Td]
 
         vel_cmd = JointState()
         vel_cmd.header = h
         vel_cmd.name = ["back_wheel_joint"]
         vel_cmd.velocity = [cmd_msg.desired_speed / self.wheel_radius] # covert from m/s to rad/s
 
-        return [None, vel_cmd, None]
+        return [torque_cmd, vel_cmd, None]
+        #return [None, vel_cmd, None]
     
