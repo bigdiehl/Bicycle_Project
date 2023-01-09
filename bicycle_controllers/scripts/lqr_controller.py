@@ -77,9 +77,13 @@ class LQR_Controller (Controller) :
             is of type sensor_msgs.JointState or None. 
         """
 
+        # Invert desired steer angle to align with Whipple model convention (+ is clockwise)
+        desired_steer_angle = cmd_msg.desired_steer_angle * -1
+        #print("Received {:f} steer angle".format(cmd_msg.desired_steer_angle))
+
         state = np.array([inputs['phi'], inputs['delta'], inputs['phidot'], inputs['deltadot']])
 
-        Td = self.kr*cmd_msg.desired_steer_angle - self.K.dot(state)
+        Td = self.kr*desired_steer_angle - self.K.dot(state)
         umax = 20
         Td = self.saturate(Td, umax, -umax)
         

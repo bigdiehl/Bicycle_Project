@@ -78,8 +78,10 @@ class BicycleController():
         # Actuator inputs
         self.Td = 0    # Steering torque
 
-        # High level steering commands
+        # High level steering commands. Initialize to maintain initial configuration. 
         self.commands = BicycleCmd()
+        self.commands.desired_steer_angle = np.radians(rospy.get_param("bicycle/initial_conditions/delta", 0))
+        self.commands.desired_speed = rospy.get_param("bicycle/initial_conditions/vel", 0)
 
         self.inputs = {}
 
@@ -95,11 +97,13 @@ class BicycleController():
         self.rate = rospy.Rate(1)
 
         self.n = 0
+        self.state = 'upright'
 
     def ReceiveCommand(self, msg):
         """ Receives BicycleCmd message """
         # Note - which values will actually be used depends on the particular controller. 
         self.commands = msg
+        #print("Received {:f} steer angle".format(msg.desired_steer_angle))
 
     def ReadJointStates(self, msg):
         """ Receives JointState messages and extracts the steering angle,
@@ -140,6 +144,7 @@ class BicycleController():
         # TODO - should we just store these in dictionary in first place? rather than in local variables 
         # and then packing up there?
         # TODO - can probably be replaced by BicycleStates msg, below
+        # NOTE - delta and deltadot are negative to align with whipple model convention
         self.inputs['phi']      = self.phi
         self.inputs['delta']    = -self.delta
         self.inputs['phidot']   = self.phidot.differentiate(self.phi, self.Ts)
@@ -164,6 +169,7 @@ class BicycleController():
         if self.n > 10:
             self.first_states_received = True
 
+
     def publish_path(self, event):
         # h = Header()
         # h.stamp = rospy.Time.now()
@@ -179,22 +185,45 @@ class BicycleController():
         
         self.path_pub.publish(self.path)
 
+    def kill_control(self):
+        """ Zero steering torque and command back wheel to come to stop. """
+        h = Header()
+        h.stamp = rospy.Time.now()
+
+        torque_cmd = JointState()
+        torque_cmd.header = h
+        torque_cmd.name = ["steering_joint"]
+        torque_cmd.effort = [0.0]
+
+        vel_cmd = JointState()
+        vel_cmd.header = h
+        vel_cmd.name = ["back_wheel_joint"]
+        vel_cmd.velocity = [0.0]
+
+        self.tau_pub.publish(torque_cmd)
+        self.vel_pub.publish(vel_cmd)
+
     def publish_control(self, event):
         if self.first_states_received:
             [torque_cmd, velocity_cmd, position_cmd] = self.controller.control(self.inputs, self.commands)
-            
-            if torque_cmd is not None:
-                self.tau_pub.publish(torque_cmd)
 
-            if velocity_cmd is not None:
-                self.vel_pub.publish(velocity_cmd)
+            # If we have fallen down, kill controller
+            if(np.abs(self.phi) > np.radians(70)):
+                self.kill_control()
 
-            if position_cmd is not None:
-                pass
+                if self.state == 'down':
+                    rospy.loginfo("Crash detected. state is {}. Ceasing controls".format(self.state))
+                    self.state = 'down'                    
+        
+            else:
+                if torque_cmd is not None:
+                    self.tau_pub.publish(torque_cmd)
 
-    def publish_states(self, event):
-        """ Publishes bicycle states """
+                if velocity_cmd is not None:
+                    self.vel_pub.publish(velocity_cmd)
 
+                if position_cmd is not None:
+                    pass
 
     def run(self):
         self.reset()
