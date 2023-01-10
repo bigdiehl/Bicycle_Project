@@ -43,9 +43,11 @@ bicycle : {
 }
 # -------------------------------------------
 
-controller: {
+whipple_controller: {
 
-  vel_des : 4,
+  update_rate: 100,
+  sigma: 0.01,  # Dirty derivative parameters
+  steering_torque_max: 20,
 
   # State Space matrices
   # A calcuted for v = 4
@@ -60,18 +62,25 @@ controller: {
        [-0.15580437],
        [ 2.45373858]])",
 
-  C : "np.array([0, 1, 0, 0])",
+  C : "np.array([[0, 1, 0, 0]])",
 
   D : "np.array([[0.]])",
 
-  update_rate: 100, # Hz
-  sigma: 0.01,  # Dirty derivative parameters
-
-  lqr_controller : {
-    Q : "np.array([[0, 0, 0, 0],
-       [1, 1, 0, 0],
+  lqr_ideal : {
+    Q : "np.array([[1, 0, 0, 0],
+       [0, 1, 0, 0],
        [0, 0, 1, 0],
        [0, 0, 0, 1]])",
+
+    R : "np.array([0.2])"
+  },
+
+  lqr_integral : {
+    Q : "np.array([[ 1,  0,  0,  0,  0],
+       [ 0,  2,  0,  0,  0],
+       [ 0,  0,  1,  0,  0],
+       [ 0,  0,  0,  1,  0],
+       [ 0,  0,  0,  0, 10]])",
 
     R : "np.array([0.2])"
   },

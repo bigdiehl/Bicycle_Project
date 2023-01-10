@@ -67,3 +67,6 @@ class Integrator:
         self.x_int += (Ts/2)*(x+self.x_last)
         self.x_last = x
         return self.x_int
+
+    def get_state(self):
+        return self.x_int

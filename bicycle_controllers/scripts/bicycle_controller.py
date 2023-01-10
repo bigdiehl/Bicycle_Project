@@ -36,6 +36,7 @@ class BicycleController():
         
         # Will self-parameterize from parameter server
         self.controller = LQR_Controller()
+        self.control_params = 'whipple_controller'
 
         # Publishers
         self.tau_pub = rospy.Publisher('bicycle/torque_cmd', JointState, queue_size=10)
@@ -51,8 +52,8 @@ class BicycleController():
         self.command_sub = rospy.Subscriber("bicycle/command", BicycleCmd, self.ReceiveCommand)
 
         # Parameters
-        self.control_rate = rospy.Rate(rospy.get_param("controller/update_rate", 100)) # Hz. Rate at which actuator commands will be sent
-        self.sigma = rospy.get_param("controller/sigma", 0.01)
+        self.control_rate = rospy.get_param(self.control_params + "/update_rate", 100) # Hz. Rate at which actuator commands will be sent
+        self.sigma = rospy.get_param(self.control_params + "/sigma", 0.01)
         self.wheel_radius = rospy.get_param("bicycle/wheel_radius", 0.35)
         self.state_update_rate = rospy.get_param("bicycle_plugin/publish_update_rate")
         self.Ts = 1.0 / self.state_update_rate
@@ -146,9 +147,9 @@ class BicycleController():
         # TODO - can probably be replaced by BicycleStates msg, below
         # NOTE - delta and deltadot are negative to align with whipple model convention
         self.inputs['phi']      = self.phi
-        self.inputs['delta']    = -self.delta
+        self.inputs['delta']    = self.delta
         self.inputs['phidot']   = self.phidot.differentiate(self.phi, self.Ts)
-        self.inputs['deltadot'] = -self.deltadot
+        self.inputs['deltadot'] = self.deltadot
 
         states = BicycleStates()
         h = Header()
@@ -244,7 +245,7 @@ class BicycleController():
         self.path = Path()
         self.path.header.frame_id = 'world'
 
-        rospy.Timer(rospy.Duration(1.0 / 100), self.publish_control)
+        rospy.Timer(rospy.Duration(1.0 / self.control_rate), self.publish_control)
         rospy.Timer(rospy.Duration(1.0 / 1), self.publish_path)
 
 
