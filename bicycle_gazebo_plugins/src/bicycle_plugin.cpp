@@ -219,6 +219,9 @@ void Bicycle::Reset() {
     #endif
 
     jointController->Reset();
+    
+    vel_cmds.reset();
+    torque_cmds.reset();
 
     gzdbg << "\n";
 }
@@ -393,6 +396,9 @@ void Bicycle::OnUpdate(const common::UpdateInfo &_info) {
 
             joints[torque_cmds->name[i]]->SetForce(0, torque_cmds->effort[i]);
         }
+    }
+    else {
+        gzdbg << "No torque commands available" << std::endl;
     }
     //joints[BACK_WHEEL_JOINT]->SetForce(0, 10);
 

@@ -83,6 +83,7 @@ class LQR_Controller (Controller) :
             # NOTE - Make sure C is the correct shape. I.e. actually a matrix, not an array
             self.K, S, E = c.lqr(self.A, self.B, self.Q, self.R, integral_action=-self.C)
             
+            self.K = np.array([[-1306.64782748,   397.64253381,  -371.94086097,   +22.89964498, 4.43663516]])
             # K is of dimensions (1, n_states + n_outputs). Split K into Kx and KI
             self.Kx = np.reshape(self.K[0, 0:4], (1,4))
             self.KI = self.K[0, 4]
@@ -121,13 +122,17 @@ class LQR_Controller (Controller) :
         #   * output torque, Td
 
         desired_steer_angle = cmd_msg.desired_steer_angle * -1
+
         #print("Received {:f} steer angle".format(cmd_msg.desired_steer_angle))
 
         state = np.array([inputs['phi'], -inputs['delta'], inputs['phidot'], -inputs['deltadot']])
         
         error = state[1] - desired_steer_angle
 
-        Td = - self.Kx.dot(state) - self.KI*self.delta_error_int.integrate(error, self.Ts)
+        #desired_roll = cmd_msg.desired_steer_angle
+        #error = state[0] - desired_roll 
+
+        Td = - self.Kx.dot(state) + self.KI*self.delta_error_int.integrate(error, self.Ts)
 
         Td = self.saturate(Td, self.umax, -self.umax)
         

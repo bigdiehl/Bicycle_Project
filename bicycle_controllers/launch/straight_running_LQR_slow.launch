@@ -1,0 +1,56 @@
+<launch>
+
+    <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+    <arg name="paused" default="true"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+
+    <arg name="x_pos" default="0.0"/>
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0.0"/>
+
+    <!-- Due to rviz rendering issues, we have a seperate urdf for rviz with simplified visual elements -->
+    <arg name="rviz_model" default="$(find bicycle_description)/urdf/baseline_model_rviz.urdf.xacro"/>
+    <arg name="gazebo_model" default="$(find bicycle_description)/urdf/baseline_model.urdf.xacro"/>
+
+    <param name="robot_description" command="xacro --inorder '$(arg rviz_model)'" />
+    <param name="robot_description_gazebo" command="xacro --inorder '$(arg gazebo_model)'" />
+    <param name="use_gui" value="$(arg gui)"/>
+    <param name="use_sim_time" value="$(arg use_sim_time)"/>
+    <param name="bicycle_plugin/publish_update_rate" value="100"/>
+
+    <rosparam file="$(find bicycle_controllers)/config/straight_running_slow.yaml" command="load"/>
+
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="gui" value="$(arg gui)" />
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+        <arg name="verbose" value="true"/>
+        <arg name="world_name" value="$(find bicycle_worlds)/worlds/empty.world"/>
+    </include>
+
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model bicycle -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description_gazebo"/>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+        <param name="publish_frequency" type="double" value="100" />
+    </node>
+
+    <arg name="rvizconfig" default="$(find bicycle_description)/rviz/baseline.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" output="screen" />
+
+    <!--node pkg="bicycle_controllers"  name="bicycle_controller"  type="bicycle_controller.py" output="screen"/-->
+    <!--node pkg="bicycle_controllers"  name="bicycle_commander"  type="bicycle_commander.py" output="screen"/-->
+
+    <!-- Plotting -->
+    <!--node name="pos_vel_plot"
+        pkg="rqt_plot"
+        type="rqt_plot"
+        args="/joint_states/position[0] /joint_states/position[1]" /-->
+</launch>

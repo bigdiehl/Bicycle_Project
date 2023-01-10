@@ -13,7 +13,7 @@ bicycle : {
     x : 0.0,        #m
     y : 0.0,        #m
     z : 0.0,        #m
-    vel : 4.0,      #m/s
+    vel : 2.0,      #m/s
     roll : 0.0,     #deg
     heading : 0.0,  #deg from world x axis
     delta : 0.0,    #deg, steering angle
@@ -21,7 +21,7 @@ bicycle : {
 
   back_wheel_motor: {
     #PID velocity controller params
-    kp : 4.0,
+    kp : 6.0,
     ki : 0.1,
     kd : 0.0,
     i_max: 1000, # integral max limit
@@ -46,16 +46,16 @@ bicycle : {
 whipple_controller: {
 
   update_rate: 100,
-  sigma: 0.05,  # Dirty derivative parameters
+  sigma: .1,  # Dirty derivative parameters
   steering_torque_max: 30,
 
   # State Space matrices
   # A calcuted for v = 4
   # Note - array strings here are evaluated to np.arrays in code
-  A :  "np.array([[  0.        ,   0.        ,   1.        ,   0.        ],
-       [  0.        ,   0.        ,   0.        ,   1.        ],
-       [ 12.31395651, -16.87760167,  -0.27173364,   2.60910336],
-       [  0.1920345 ,  15.36231465,   4.27949062,  -0.97726968]])",
+  A :  "np.array([[ 0.        ,  0.        ,  1.        ,  0.        ],
+       [ 0.        ,  0.        ,  0.        ,  1.        ],
+       [12.31395651, -9.40963585, -0.20380023,  1.95682752],
+       [ 0.1920345 ,  9.10712216,  3.20961797, -0.73295226]])",
 
   B : "np.array([[ 0.        ],
        [ 0.        ],
@@ -72,7 +72,7 @@ whipple_controller: {
        [0, 0, 1, 0],
        [0, 0, 0, 1]])",
 
-    R : "np.array([0.2])"
+    R : "np.array([2000])"
   },
 
   lqr_integral : {
@@ -80,9 +80,9 @@ whipple_controller: {
        [ 0,  1,  0,  0,  0],
        [ 0,  0,  1,  0,  0],
        [ 0,  0,  0,  1,  0],
-       [ 0,  0,  0,  0, 30]])",
+       [ 0,  0,  0,  0, 100]])",
 
-    R : "np.array([0.1])"
+    R : "np.array([10])"
   },
 }
 
